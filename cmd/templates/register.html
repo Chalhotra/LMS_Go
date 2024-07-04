@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h2>Register</h2>
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+      </form>
+    </div>
+
+    <script>
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          fetch("/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username: username, password: password }),
+          })
+            .then((response) => {
+              if (response.ok) {
+                if (response.headers.has("Location")) {
+                  const redirectUrl = response.headers.get("Location");
+                  window.location.href = redirectUrl; // Redirect to the provided URL
+                }
+                return response.json();
+              } else {
+                throw new Error("Registration failed");
+              }
+            })
+            .then((data) => {
+              console.log("Success:", data);
+              // Optionally handle success (e.g., show a success message)
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              // Optionally handle error (e.g., show an error message to the user)
+            });
+        });
+    </script>
+  </body>
+</html>

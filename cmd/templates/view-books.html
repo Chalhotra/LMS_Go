@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Available Books</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Navigation Template -->
+    {{template "nav.html" .}}
+
+    <div class="container mt-5">
+      <h1 class="mb-4">Available Books</h1>
+      <div class="card">
+        <div class="card-header">
+          <h3>Books List</h3>
+        </div>
+        <div class="card-body">
+          <div id="books-list">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ISBN</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Availability Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="booksBody">
+                <!-- Books list will be dynamically populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const booksBody = document.getElementById("booksBody");
+
+        fetch("/api/user/books/available", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            booksBody.innerHTML = ""; // Clear previous results
+
+            if (data && data.length > 0) {
+              data.forEach((book) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                <td>${book.isbn}</td>
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.available == "1" ? "Available" : "Checked Out"}</td>
+                <td>
+                  <button class="btn btn-primary" ${
+                    book.available == "0" ? "disabled" : ""
+                  }
+                    onclick="checkoutBook('${book.id}')">
+                    ${book.available == "1" ? "Checkout" : "Unavailable"}
+                  </button>
+                </td>
+              `;
+                booksBody.appendChild(row);
+              });
+            } else {
+              booksBody.innerHTML =
+                "<tr><td colspan='5'>No books available.</td></tr>";
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            booksBody.innerHTML =
+              "<tr><td colspan='5'>An error occurred while fetching books.</td></tr>";
+          });
+      });
+
+      function checkoutBook(id) {
+        fetch(`/api/user/books/checkout/id=${id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            if (response.headers.has("Location")) {
+              const redirectUrl = response.headers.get("Location");
+              window.location.href = redirectUrl; // Redirect to the provided URL
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            if (data.book_id) {
+              alert("Book checked out successfully!");
+              location.reload(); // Refresh the page to update the availability status
+            } else {
+              alert("Failed to checkout the book.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

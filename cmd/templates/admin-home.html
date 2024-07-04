@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    {{template "nav-admin.html" .}}
+
+    <div class="container mt-5">
+      <h1 class="mb-4">Welcome admin, <span id="username"></span>!</h1>
+      <div class="card">
+        <div class="card-header">
+          <h3>Add New Book</h3>
+        </div>
+        <div class="card-body">
+          <form id="addBookForm">
+            <div class="form-group">
+              <label for="isbn">ISBN</label>
+              <input
+                type="text"
+                class="form-control"
+                id="isbn"
+                name="isbn"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input
+                type="text"
+                class="form-control"
+                id="title"
+                name="title"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="author">Author</label>
+              <input
+                type="text"
+                class="form-control"
+                id="author"
+                name="author"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="quantity">Quantity</label>
+              <input
+                type="text"
+                class="form-control"
+                id="quantity"
+                name="quantity"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-primary">Add Book</button>
+          </form>
+          <div id="successMessage" class="mt-3 text-success d-none">
+            Book successfully added!
+          </div>
+          <div id="errorMessage" class="mt-3 text-danger d-none">
+            Failed to add book. Please try again.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const userName = "{{ .Username }}"; // Replace with actual username from backend
+        document.getElementById("username").innerText = userName;
+
+        const addBookForm = document.getElementById("addBookForm");
+        addBookForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const formData = new FormData(addBookForm);
+          const data = {
+            isbn: formData.get("isbn"),
+            title: formData.get("title"),
+            author: formData.get("author"),
+            quantity: formData.get("quantity"),
+          };
+
+          fetch("/api/admin/books/add", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log("Book added:", data);
+              document
+                .getElementById("successMessage")
+                .classList.remove("d-none");
+              document.getElementById("errorMessage").classList.add("d-none");
+              addBookForm.reset(); // Reset the form after successful submission
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              document.getElementById("successMessage").classList.add("d-none");
+              document
+                .getElementById("errorMessage")
+                .classList.remove("d-none");
+            });
+        });
+      });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

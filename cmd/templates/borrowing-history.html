@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Borrowing History</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    {{template "nav.html" .}}
+
+    <div class="container mt-5">
+      <h1 class="mb-4">Borrowing History</h1>
+      <div class="card">
+        <div class="card-header">
+          <h3>History</h3>
+        </div>
+        <div class="card-body">
+          <div id="history-list">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ISBN</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Checkout Date</th>
+                  <th>Due Date</th>
+                  <th>Return Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody">
+                <!-- History list will be dynamically populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const historyBody = document.getElementById("historyBody");
+
+        fetch("/api/user/checkouts/fetch", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            historyBody.innerHTML = ""; // Clear previous results
+
+            if (Array.isArray(data) && data.length > 0) {
+              data.forEach((record) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                        <td>${record.id}</td>
+                        <td>${record.title}</td>
+                        <td>${record.author}</td>
+                        <td>${new Date(
+                          record.checkout_date
+                        ).toLocaleString()}</td>
+                        <td>${new Date(record.due_date).toLocaleString()}</td>
+                        <td>${
+                          record.return_date &&
+                          record.return_date !== "0001-01-01T00:00:00Z"
+                            ? new Date(record.return_date).toLocaleString()
+                            : "Not returned"
+                        }</td>
+                        <td>
+                            ${
+                              record.return_date &&
+                              record.return_date !== "0001-01-01T00:00:00Z"
+                                ? ""
+                                : `<button class="btn btn-primary" onclick="checkinBook('${record.id}')">Checkin</button>`
+                            }
+                        </td>
+                      `;
+                historyBody.appendChild(row);
+              });
+            } else {
+              historyBody.innerHTML =
+                "<tr><td colspan='7'>No borrowing history available.</td></tr>";
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+            historyBody.innerHTML =
+              "<tr><td colspan='7'>An error occurred while fetching borrowing history.</td></tr>";
+          });
+      });
+
+      function checkinBook(id) {
+        fetch(`/api/user/checkins/${id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then((data) => {
+                throw new Error(data.message);
+              });
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.success) {
+              alert("Book checked in successfully!");
+              location.reload(); // Refresh the page to update the status
+            } else {
+              alert("Failed to check in the book.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error checking in book:", error);
+            alert(
+              "An error occurred while checking in the book: " + error.message
+            );
+          });
+      }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Requests</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .navbar-custom {
+        background-color: #343a40;
+      }
+
+      .navbar-custom .nav-link {
+        color: #ffffff;
+      }
+
+      .navbar-custom .nav-link.active {
+        color: #ffc107;
+      }
+    </style>
+  </head>
+  <body>
+    {{ template "nav-admin.html" .}}
+    <div class="container mt-5">
+      <h1 class="mb-4">Admin Requests</h1>
+      <div class="card">
+        <div class="card-header">
+          <h3>Admin Requests List</h3>
+        </div>
+        <div class="card-body">
+          <div id="admin-requests">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>User Name</th>
+                  <th>Request Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminRequestsBody">
+                <!-- Admin requests list will be dynamically populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const adminRequestsBody = document.getElementById("adminRequestsBody");
+
+        fetch("/api/admin/requests/view", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            adminRequestsBody.innerHTML = ""; // Clear previous results
+
+            if (data && data.length > 0) {
+              data.forEach((request) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+              <td>${request.username}</td>
+              <td>${request.admin_request_status}</td>
+              <td>
+                ${
+                  request.admin_request_status === "pending"
+                    ? `<button class="btn btn-success" onclick="approveRequest('${request.id}')">Approve</button>
+                     <button class="btn btn-danger ml-2" onclick="denyRequest('${request.id}')">Deny</button>`
+                    : request.admin_request_status
+                }
+              </td>
+            `;
+                adminRequestsBody.appendChild(row);
+              });
+            } else {
+              adminRequestsBody.innerHTML =
+                "<tr><td colspan='4'>No admin requests available.</td></tr>";
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            adminRequestsBody.innerHTML =
+              "<tr><td colspan='4'>An error occurred while fetching admin requests.</td></tr>";
+          });
+      });
+      function approveRequest(id) {
+        fetch(`/api/admin/requests/approve/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            alert(data.message || "Success");
+            location.reload(); // Refresh the page to update the admin requests list
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Failed to approve the request.");
+          });
+      }
+
+      function denyRequest(id) {
+        fetch(`/api/admin/requests/deny/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            alert(data.message || "Success");
+            location.reload(); // Refresh the page to update the admin requests list
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Failed to deny the request.");
+          });
+      }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

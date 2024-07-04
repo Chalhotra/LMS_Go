@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Library System</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .navbar-custom {
+        background-color: #343a40; /* Dark background color */
+      }
+
+      .navbar-custom .nav-link {
+        color: #ffffff; /* White text color */
+      }
+
+      .navbar-custom .nav-link.active {
+        color: #ffc107; /* Yellow text color for active link */
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+      <a class="navbar-brand" href="#">Library System</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="/api/">
+              Home <span class="sr-only">(current)</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/api/user/books/view">Books</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/api/user/checkouts/history"
+              >Borrowing History</a
+            >
+          </li>
+        </ul>
+        <form
+          class="form-inline my-2 my-lg-0"
+          id="requestAdminForm"
+          action="/api/user/request"
+          method="post"
+        >
+          <button
+            class="btn btn-warning my-2 my-sm-0"
+            type="button"
+            onclick="confirmRequest()"
+          >
+            Request Admin Status
+          </button>
+        </form>
+        <div style="width: 1rem"></div>
+        <form
+          class="form-inline my-2 my-lg-0"
+          action="/api/logout"
+          method="post"
+        >
+          <button class="btn btn-danger my-2 my-sm-0" type="submit">
+            Logout
+          </button>
+        </form>
+      </div>
+    </nav>
+
+    <!-- Your content here -->
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      function confirmRequest() {
+        if (confirm("Are you sure you want to request admin status?")) {
+          fetch("/api/user/request", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({}),
+          })
+            .then((response) => response.text()) // Change to text to log raw response
+            .then((text) => {
+              console.log("Raw response:", text); // Log raw response
+              let data;
+              try {
+                data = JSON.parse(text); // Parse JSON from text
+              } catch (e) {
+                throw new Error("Invalid JSON: " + text);
+              }
+
+              if (data && data.success) {
+                alert(data.message); // Show success message from response
+              } else {
+                alert(data.message || "Failed to send request."); // Show failure message from response
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Failed to send request. Please try again.");
+            });
+        }
+      }
+    </script>
+  </body>
+</html>

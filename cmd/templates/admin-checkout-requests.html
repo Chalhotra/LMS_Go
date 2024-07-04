@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout Requests</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Navigation Template -->
+    {{template "nav-admin.html" .}}
+
+    <div class="container mt-5">
+      <h1 class="mb-4">Checkout Requests</h1>
+      <div class="card">
+        <div class="card-header">
+          <h3>Checkout Requests List</h3>
+        </div>
+        <div class="card-body">
+          <div id="checkout-requests">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>User Name</th>
+                  <th>Book Title</th>
+                  <th>Checkout Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="checkoutRequestsBody">
+                <!-- Checkout requests list will be dynamically populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const checkoutRequestsBody = document.getElementById(
+          "checkoutRequestsBody"
+        );
+
+        fetch("/api/admin/checkouts/requests", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            checkoutRequestsBody.innerHTML = ""; // Clear previous results
+
+            if (data && data.length > 0) {
+              data.forEach((request) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                <td>${request.username}</td>
+                <td>${request.title}</td>
+                <td>${request.checkout_status}</td>
+                <td>
+                  ${
+                    request.checkout_status === "pending"
+                      ? `<button class="btn btn-success" onclick="approveRequest('${request.id}')">Approve</button>
+                     <button class="btn btn-danger ml-2" onclick="denyRequest('${request.id}')">Deny</button>`
+                      : `${request.checkout_status}`
+                  }
+                </td>
+              `;
+                checkoutRequestsBody.appendChild(row);
+              });
+            } else {
+              checkoutRequestsBody.innerHTML =
+                "<tr><td colspan='4'>No checkout requests available.</td></tr>";
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            checkoutRequestsBody.innerHTML =
+              "<tr><td colspan='4'>An error occurred while fetching checkout requests.</td></tr>";
+          });
+      });
+
+      function approveRequest(id) {
+        fetch(`/api/admin/checkouts/approve/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            alert("Request approved successfully!");
+            location.reload(); // Refresh the page to update the checkout requests list
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Failed to approve the request.");
+          });
+      }
+
+      function denyRequest(id) {
+        fetch(`/api/admin/checkouts/deny/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            alert("Request denied successfully!");
+            location.reload(); // Refresh the page to update the checkout requests list
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Failed to deny the request.");
+          });
+      }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
