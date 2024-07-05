@@ -65,7 +65,6 @@ func RequestAdminStatus(userID int) error {
 	}
 	defer db.Close()
 
-	// Check the current status of admin_request_status
 	var currentStatus sql.NullString
 	query := "SELECT admin_request_status FROM users WHERE id = ?"
 	err = db.QueryRow(query, userID).Scan(&currentStatus)
@@ -76,7 +75,6 @@ func RequestAdminStatus(userID int) error {
 		return err
 	}
 
-	// If the status is already pending, return an error
 	if currentStatus.String == "pending" {
 		return fmt.Errorf("admin request already pending for user ID %d", userID)
 	}
