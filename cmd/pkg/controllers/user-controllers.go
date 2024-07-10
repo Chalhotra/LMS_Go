@@ -81,27 +81,24 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	})
 
 	// w.WriteHeader(http.StatusSeeOther)
-	if tmpuser.IsAdmin == "1" {
+	if tmpuser.IsAdmin == "1" || tmpuser.IsAdmin == "2" {
 		w.Header().Set("Location", "/api/admin/welcome")
 	} else {
 		w.Header().Set("Location", "/api/user/welcome")
 	}
 
 }
-
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var user types.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		// w.WriteHeader(http.StatusSeeOther)
 		w.Header().Set("Location", "/error?type=400 Bad Request&message=Invalid request format")
 		return
 	}
 
 	err = models.RegisterUser(user)
 	if err != nil {
-		// w.WriteHeader(http.StatusSeeOther)
 		if err.Error() == "username already exists" {
 			w.Header().Set("Location", "/error?type=400 Bad Request&message=Username already exists")
 		} else {
@@ -110,7 +107,6 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// w.WriteHeader(http.StatusSeeOther)
 	w.Header().Set("Location", "/login")
 	json.NewEncoder(w).Encode(map[string]string{"username": user.Username})
 }

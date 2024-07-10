@@ -5,6 +5,7 @@ import (
 	"bookstore/cmd/pkg/utils"
 	"bookstore/cmd/types"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -164,5 +165,43 @@ func DenyAdminRequest(w http.ResponseWriter, r *http.Request) {
 		"success": true,
 		"message": "Denied Admin Request!",
 	})
+
+}
+func GetAllAdmins(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Check if the user is a super admin
+	if !utils.CheckSuperAdmin(w, r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Unauthorized"})
+		return
+	}
+
+	admins, err := models.GetAllAdmins()
+	if err != nil {
+		fmt.Print(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
+		return
+	}
+
+	json.NewEncoder(w).Encode(admins)
+}
+func RemoveFromAdmin(w http.ResponseWriter, r *http.Request) {
+	if !utils.CheckSuperAdmin(w, r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Unauthorized"})
+		return
+	}
+	params := mux.Vars(r)
+	userID := params["id"]
+	err := models.RemoveFromAdmin(userID)
+	if err != nil {
+		fmt.Print(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"message": "Removed from admin successfully"})
 
 }

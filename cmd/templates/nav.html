@@ -39,18 +39,22 @@
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="/api/">
-              Home <span class="sr-only">(current)</span>
+          <li class="nav-item">
+            <a class="nav-link" href="/api/" id="navHome"> Home </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/api/user/books/view" id="navBooks">
+              Books
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/api/user/books/view">Books</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/api/user/checkouts/history"
-              >Borrowing History</a
+            <a
+              class="nav-link"
+              href="/api/user/checkouts/history"
+              id="navHistory"
             >
+              Borrowing History
+            </a>
           </li>
         </ul>
         <form
@@ -86,6 +90,29 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+      // Function to add 'active' class to current nav link based on URL
+      function setActiveNav() {
+        const currentLocation = window.location.pathname;
+        const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+
+        navLinks.forEach((link) => {
+          const href = link.getAttribute("href");
+          if (
+            currentLocation === href ||
+            (currentLocation === "/api/user/welcome" && href === "/api/")
+          ) {
+            link.classList.add("active");
+          } else {
+            link.classList.remove("active");
+          }
+        });
+      }
+
+      // Call setActiveNav on page load and when navigation occurs
+      document.addEventListener("DOMContentLoaded", setActiveNav);
+      window.addEventListener("popstate", setActiveNav);
+
+      // Function to handle admin request confirmation
       function confirmRequest() {
         if (confirm("Are you sure you want to request admin status?")) {
           fetch("/api/user/request", {

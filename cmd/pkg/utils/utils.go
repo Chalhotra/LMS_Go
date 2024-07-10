@@ -30,7 +30,7 @@ func GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) types.User {
 func CheckAdmin(w http.ResponseWriter, r *http.Request) bool {
 	var user types.User = GetCurrentUserInfo(w, r)
 
-	return user.IsAdmin == "1"
+	return user.IsAdmin == "1" || user.IsAdmin == "2"
 }
 
 func ParseJSON(r *http.Request, payload any) error {
@@ -40,4 +40,10 @@ func ParseJSON(r *http.Request, payload any) error {
 	}
 	return json.NewDecoder(r.Body).Decode(payload)
 
+}
+
+func CheckSuperAdmin(w http.ResponseWriter, r *http.Request) bool {
+	var user types.User = GetCurrentUserInfo(w, r)
+
+	return user.IsAdmin == "2"
 }

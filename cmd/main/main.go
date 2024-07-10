@@ -10,5 +10,5 @@ import (
 func main() {
 	fmt.Println("Started the API server")
 	r := routes.SetupRouter()
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(":8000", r))
 }

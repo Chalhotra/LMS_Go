@@ -102,7 +102,7 @@
           .then((data) => {
             console.log(data);
             if (data.book_id) {
-              alert("Book checked out successfully!");
+              alert("Check out request sent successfully!");
               location.reload(); // Refresh the page to update the availability status
             } else {
               alert("Failed to checkout the book.");

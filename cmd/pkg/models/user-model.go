@@ -185,3 +185,49 @@ func DenyAdminRequest(userID string) error {
 
 	return nil
 }
+
+func GetAllAdmins() ([]types.User, error) {
+	db, err := Connection()
+	if err != nil {
+		return nil, err
+	}
+
+	query := `SELECT id, username, isAdmin FROM users where isAdmin = 1`
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var adminList []types.User
+	for rows.Next() {
+		var user types.User
+		err := rows.Scan(&user.ID, &user.Username, &user.IsAdmin)
+		if err != nil {
+			return nil, err
+		}
+		adminList = append(adminList, user)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return adminList, nil
+}
+
+func RemoveFromAdmin(userID string) error {
+	db, err := Connection()
+	if err != nil {
+		return err
+	}
+
+	query := `UPDATE users SET isAdmin = 0 WHERE id = ?`
+	_, err = db.Exec(query, userID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

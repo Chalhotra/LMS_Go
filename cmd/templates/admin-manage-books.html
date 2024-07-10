@@ -8,6 +8,15 @@
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <style>
+      .container {
+        max-width: 900px;
+      }
+      .table thead th {
+        background-color: #343a40;
+        color: #ffffff;
+      }
+    </style>
   </head>
   <body>
     <!-- Navigation Template -->
@@ -16,7 +25,7 @@
     <div class="container mt-5">
       <h1 class="mb-4">Manage Books</h1>
       <div class="card">
-        <div class="card-header">
+        <div class="card-header bg-dark text-white">
           <h3>Books List</h3>
         </div>
         <div class="card-body">
@@ -65,7 +74,7 @@
                 <td>${book.quantity}</td>
                 <td>${book.available == "1" ? "Available" : "Checked Out"}</td>
                 <td>
-                  <button class="btn btn-warning" onclick="location.href='/api/admin/books/update/${
+                  <button class="btn btn-primary" onclick="location.href='/api/admin/books/update/${
                     book.id
                   }'">
                     Update

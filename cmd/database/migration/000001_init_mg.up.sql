@@ -8,7 +8,7 @@ CREATE TABLE users (
 
 CREATE TABLE books (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    isbn VARCHAR(13) UNIQUE NULL,
+    isbn VARCHAR(25) UNIQUE NULL,
     title VARCHAR(255) NOT NULL,
     author VARCHAR(255) NOT NULL,
     quantity INT DEFAULT 1,
@@ -28,16 +28,15 @@ CREATE TABLE checkouts (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-
-INSERT INTO books (isbn, title, author, quantity, available)
+INSERT INTO books (isbn, title, author, quantity)
 VALUES 
-('978-3-16-148410-0', 'Harry Potter and the Philosophers Stone', 'J.K. Rowling', 20, 1),
-('978-3-16-148411-7', '1984', 'George Orwell', 15, 1),
-('978-3-16-148412-4', 'To Kill a Mockingbird', 'Harper Lee', 25, 1),
-('978-3-16-148413-1', 'The Great Gatsby', 'F. Scott Fitzgerald', 18, 1),
-('978-3-16-148414-8', 'Moby Dick', 'Herman Melville', 22, 1),
-('978-3-16-148415-5', 'Pride and Prejudice', 'Jane Austen', 30, 1),
-('978-3-16-148416-2', 'The Catcher in the Rye', 'J.D. Salinger', 28, 1),
-('978-3-16-148417-9', 'The Hobbit', 'J.R.R. Tolkien', 24, 1),
-('978-3-16-148418-6', 'The Lord of the Rings', 'J.R.R. Tolkien', 26, 1),
-('978-3-16-148419-3', 'The Hunger Games', 'Suzanne Collins', 35, 1);
+('978-3-16-148410-0', 'Harry Potter and the Philosophers Stone', 'J.K. Rowling', 20),
+('978-3-16-148411-7', '1984', 'George Orwell', 15),
+('978-3-16-148412-4', 'To Kill a Mockingbird', 'Harper Lee', 25),
+('978-3-16-148413-1', 'The Great Gatsby', 'F. Scott Fitzgerald', 18),
+('978-3-16-148414-8', 'Moby Dick', 'Herman Melville', 22),
+('978-3-16-148415-5', 'Pride and Prejudice', 'Jane Austen', 30),
+('978-3-16-148416-2', 'The Catcher in the Rye', 'J.D. Salinger', 28),
+('978-3-16-148417-9', 'The Hobbit', 'J.R.R. Tolkien', 24),
+('978-3-16-148418-6', 'The Lord of the Rings', 'J.R.R. Tolkien', 26),
+('978-3-16-148419-3', 'The Hunger Games', 'Suzanne Collins', 35);

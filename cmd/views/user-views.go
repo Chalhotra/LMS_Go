@@ -19,7 +19,7 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, data in
 	tmplPath := "cmd/templates/" + tmpl
 	var t *template.Template
 	var err error
-	if user.IsAdmin == "1" {
+	if user.IsAdmin == "1" || user.IsAdmin == "2" {
 		t, err = template.ParseFiles(tmplPath, "cmd/templates/nav-admin.html")
 	} else {
 		t, err = template.ParseFiles(tmplPath, "cmd/templates/nav.html")

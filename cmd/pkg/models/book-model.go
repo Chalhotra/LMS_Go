@@ -101,10 +101,10 @@ func UpdateBook(id string, book types.Book) error {
 
 	query := `
 		UPDATE books
-		SET isbn = ?, title = ?, author = ?
+		SET quantity = ?
 		WHERE id = ?
 	`
-	_, err = db.Exec(query, book.ISBN, book.Title, book.Author, id)
+	_, err = db.Exec(query, book.Quantity, id)
 	if err != nil {
 		return err
 	}

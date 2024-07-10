@@ -49,6 +49,7 @@ func SetupRouter() *mux.Router {
 	authenticatedRouter.HandleFunc("/user/checkouts/fetch", controllers.FetchCheckouts).Methods("GET")
 	authenticatedRouter.HandleFunc("/user/checkins/{checkoutID}", controllers.CheckinBook).Methods("POST")
 	authenticatedRouter.HandleFunc("/admin/books", controllers.GetBooks).Methods("GET")
+	authenticatedRouter.HandleFunc("/admin/book/{id}", controllers.GetBook).Methods("GET")
 	authenticatedRouter.HandleFunc("/admin/books/add", controllers.AdminAddBook).Methods("POST")
 	authenticatedRouter.HandleFunc("/admin/books/manage", views.AdminManageBooks).Methods("GET")
 	authenticatedRouter.HandleFunc("/admin/books/delete/{id}", controllers.DeleteBook).Methods("DELETE")
@@ -62,6 +63,10 @@ func SetupRouter() *mux.Router {
 	authenticatedRouter.HandleFunc("/admin/requests/view", controllers.GetAdminRequests).Methods("GET")
 	authenticatedRouter.HandleFunc("/admin/requests/approve/{id}", controllers.ApproveAdminRequest).Methods("PUT")
 	authenticatedRouter.HandleFunc("/admin/requests/deny/{id}", controllers.DenyAdminRequest).Methods("PUT")
+	authenticatedRouter.HandleFunc("/admins/view", views.AdminListPage).Methods("GET")
+	authenticatedRouter.HandleFunc("/admins", controllers.GetAllAdmins).Methods("GET")
+	authenticatedRouter.HandleFunc("/admins/{id}", controllers.RemoveFromAdmin).Methods("DELETE")
+
 	// Add this line for search
 	return router
 
@@ -75,7 +80,7 @@ func redirectToHomeOrLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.IsAdmin == "1" {
+	if user.IsAdmin == "1" || user.IsAdmin == "2" {
 		// If user is an admin, redirect to the admin welcome page
 		http.Redirect(w, r, "/api/admin/welcome", http.StatusSeeOther)
 	} else {

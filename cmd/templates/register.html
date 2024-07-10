@@ -5,39 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register</title>
     <link
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
       rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <style>
+      .card {
+        margin: 0 auto; /* Center the card horizontally */
+        float: none; /* Clear any float that may affect layout */
+        margin-top: 50px; /* Margin from the top */
+        max-width: 400px; /* Limit card width */
+      }
+    </style>
   </head>
   <body>
-    <div class="container mt-5">
-      <h2>Register</h2>
-      <form id="registerForm">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input
-            type="text"
-            class="form-control"
-            id="username"
-            name="username"
-            required
-          />
+    <div class="container">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title text-center">Register</h2>
+          <form id="registerForm">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                name="username"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-group">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  name="password"
+                  required
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">
+                    <i
+                      class="fa fa-eye-slash toggle-password"
+                      data-target="#password"
+                    ></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password</label>
+              <div class="input-group">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  required
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">
+                    <i
+                      class="fa fa-eye-slash toggle-password"
+                      data-target="#confirmPassword"
+                    ></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+              Register
+            </button>
+          </form>
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            class="form-control"
-            id="password"
-            name="password"
-            required
-          />
-        </div>
-        <button type="submit" class="btn btn-primary">Register</button>
-      </form>
+      </div>
     </div>
 
     <script>
+      const togglePasswordIcons = document.querySelectorAll(".toggle-password");
+
+      togglePasswordIcons.forEach((icon) => {
+        icon.addEventListener("click", function () {
+          const target = document.querySelector(
+            this.getAttribute("data-target")
+          );
+          const type =
+            target.getAttribute("type") === "password" ? "text" : "password";
+          target.setAttribute("type", type);
+          this.classList.toggle("fa-eye-slash");
+          this.classList.toggle("fa-eye");
+        });
+      });
+
       document
         .getElementById("registerForm")
         .addEventListener("submit", function (event) {
@@ -45,6 +108,13 @@
 
           const username = document.getElementById("username").value;
           const password = document.getElementById("password").value;
+          const confirmPassword =
+            document.getElementById("confirmPassword").value;
+
+          if (password !== confirmPassword) {
+            alert("Passwords do not match");
+            return;
+          }
 
           fetch("/register", {
             method: "POST",

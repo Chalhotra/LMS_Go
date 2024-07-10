@@ -71,3 +71,16 @@ func AdminRequestsPage(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, r, "admin-requests.html", user)
 
 }
+
+func AdminListPage(w http.ResponseWriter, r *http.Request) {
+	user, ok := context.Get(r, "user").(types.User)
+	if !ok {
+		w.Header().Set("Location", "/error?type=500 Internal Server Error&message=User Not Found in Context")
+		w.WriteHeader(http.StatusSeeOther)
+		return
+	}
+
+	// Render the template with user data
+	RenderTemplate(w, r, "superadmin-manage-admins.html", user)
+
+}

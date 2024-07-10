@@ -29,6 +29,7 @@
                 id="isbn"
                 name="isbn"
                 required
+                disabled
               />
             </div>
             <div class="form-group">
@@ -39,6 +40,7 @@
                 id="title"
                 name="title"
                 required
+                disabled
               />
             </div>
             <div class="form-group">
@@ -49,6 +51,7 @@
                 id="author"
                 name="author"
                 required
+                disabled
               />
             </div>
             <div class="form-group">
@@ -80,11 +83,12 @@
         const successMessage = document.getElementById("successMessage");
         const errorMessage = document.getElementById("errorMessage");
 
-        // Hide the error message initially
+        // Hide the messages initially
+        successMessage.classList.add("d-none");
         errorMessage.classList.add("d-none");
 
         // Fetch the current book details
-        fetch(`/api/admin/books/${bookId}`, {
+        fetch(`/api/admin/book/${bookId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -95,6 +99,15 @@
             document.getElementById("isbn").value = data.isbn;
             document.getElementById("title").value = data.title;
             document.getElementById("author").value = data.author;
+            document
+              .getElementById("isbn")
+              .setAttribute("placeholder", data.isbn);
+            document
+              .getElementById("title")
+              .setAttribute("placeholder", data.title);
+            document
+              .getElementById("author")
+              .setAttribute("placeholder", data.author);
             document.getElementById("quantity").value = data.quantity;
           })
           .catch((error) => {
@@ -108,9 +121,9 @@
 
           const formData = new FormData(updateBookForm);
           const data = {
-            isbn: formData.get("isbn"),
-            title: formData.get("title"),
-            author: formData.get("author"),
+            isbn: document.getElementById("isbn").value,
+            title: document.getElementById("title").value,
+            author: document.getElementById("author").value,
             quantity: formData.get("quantity"),
           };
 
