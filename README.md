@@ -104,6 +104,7 @@ This project is a Library Management System built using the MVC architecture and
 ## Usage
 ### Login and Register Portals:
 - Access via `/login` and `/register`
+- Initially when you run ``` make migrate-up```, a super admin user is created by default with credentials, username: admin, password: admin
 ### Admin Portal:
 - Access via `/api/admin/`.
 - Manage books and user requests.
