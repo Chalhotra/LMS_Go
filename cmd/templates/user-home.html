@@ -3,119 +3,98 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Navigation</title>
+    <title>Search Books</title>
     <link
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <style>
-      .navbar-custom {
-        background-color: #343a40; /* Dark background color */
-      }
-
-      .navbar-custom .nav-link {
-        color: #ffffff; /* White text color */
-      }
-
-      .navbar-custom .nav-link.active {
-        color: #ffc107; /* Yellow text color for active link */
-      }
-    </style>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-      <a class="navbar-brand" href="#">Library System</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    {{template "nav.html" .}}
 
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/api/admin/welcome" id="navAdminHome">
-              Home
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="/api/admin/books/manage"
-              id="navAdminBooks"
-            >
-              Manage Books
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="/api/admin/checkouts"
-              id="navAdminCheckouts"
-            >
-              Checkout Requests
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="/api/admin/requests"
-              id="navAdminRequests"
-            >
-              Admin Requests
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="/api/admins/view" id="navAdminList">
-              AdminList
-            </a>
-          </li>
-        </ul>
-
-        <form
-          class="form-inline my-2 my-lg-0"
-          action="/api/logout"
-          method="post"
-        >
-          <button class="btn btn-danger my-2 my-sm-0" type="submit">
-            Logout
-          </button>
-        </form>
+    <div class="container mt-5">
+      <h1 class="mb-4">Search Books</h1>
+      <div class="card">
+        <div class="card-header">
+          <h3>Search</h3>
+        </div>
+        <div class="card-body">
+          <form id="searchForm" class="form-inline mb-4">
+            <input
+              type="text"
+              class="form-control mr-2"
+              id="searchQuery"
+              placeholder="Search books..."
+              required
+            />
+            <button type="submit" class="btn btn-primary">Search</button>
+          </form>
+          <div id="searchResults">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ISBN</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Availability</th>
+                </tr>
+              </thead>
+              <tbody id="resultsBody">
+                <!-- Search results will be dynamically populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </nav>
+    </div>
 
-    <!-- Your content here -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const searchForm = document.getElementById("searchForm");
+        const resultsBody = document.getElementById("resultsBody");
+
+        searchForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const query = document.getElementById("searchQuery").value;
+
+          resultsBody.innerHTML = ""; // Clear previous results
+
+          fetch(`/api/search?query=${encodeURIComponent(query)}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data && data.length > 0) {
+                data.forEach((book) => {
+                  const row = document.createElement("tr");
+                  row.innerHTML = `
+                  <td>${book.isbn}</td>
+                  <td>${book.title}</td>
+                  <td>${book.author}</td>
+                  <td>${book.available ? "Available" : "Checked Out"}</td>
+                `;
+                  resultsBody.appendChild(row);
+                });
+              } else {
+                resultsBody.innerHTML =
+                  '<tr><td colspan="4">No results found</td></tr>';
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              resultsBody.innerHTML =
+                '<tr><td colspan="4">An error occurred while fetching results.</td></tr>';
+            });
+        });
+      });
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-      // Function to add 'active' class to current nav link based on URL
-      function setActiveNav() {
-        const currentLocation = window.location.pathname;
-        const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
-
-        navLinks.forEach((link) => {
-          const href = link.getAttribute("href");
-          if (currentLocation === href) {
-            link.classList.add("active");
-          } else {
-            link.classList.remove("active");
-          }
-        });
-      }
-
-      // Call setActiveNav on page load and when navigation occurs
-      document.addEventListener("DOMContentLoaded", setActiveNav);
-      window.addEventListener("popstate", setActiveNav);
-    </script>
   </body>
 </html>
