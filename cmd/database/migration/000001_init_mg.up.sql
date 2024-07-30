@@ -40,3 +40,6 @@ VALUES
 ('978-3-16-148417-9', 'The Hobbit', 'J.R.R. Tolkien', 24),
 ('978-3-16-148418-6', 'The Lord of the Rings', 'J.R.R. Tolkien', 26),
 ('978-3-16-148419-3', 'The Hunger Games', 'Suzanne Collins', 35);
+
+
+INSERT INTO users(username, password, isAdmin) VALUES ("admin", "$2a$10$LlWH7dGow.Xf5YoJHVE7M.K5yKgaMtF3HSrdnzD3iCXwJpnwHWWoe", 2);
