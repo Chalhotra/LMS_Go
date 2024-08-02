@@ -10,34 +10,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func AddBook(w http.ResponseWriter, r *http.Request) {
-	// Check if the user is an admin
-	if !utils.CheckAdmin(w, r) {
-		w.Header().Set("Location", "/error?type=401 Unauthorized&message=User is not an admin")
-		w.WriteHeader(http.StatusSeeOther)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	var body types.Book
-	err := json.NewDecoder(r.Body).Decode(&body)
-	if err != nil {
-		w.Header().Set("Location", "/error?type=400 Bad Request&message=Invalid request format")
-		w.WriteHeader(http.StatusSeeOther)
-		return
-	}
-
-	err = models.AddBook(body)
-	if err != nil {
-		w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
-		w.WriteHeader(http.StatusSeeOther)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(body)
-}
-
 func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	// Check if the user is an admin
 	if !utils.CheckAdmin(w, r) {
@@ -52,10 +24,16 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 
 	err := models.DeleteBook(id)
 	if err != nil {
+		if err.Error() != "book cannot be deleted because there are borrowed copies" {
+			w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
+			w.WriteHeader(http.StatusSeeOther)
 
-		w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
-		w.WriteHeader(http.StatusSeeOther)
-		return
+			return
+		} else {
+			json.NewEncoder(w).Encode(map[string]string{"message": "book cannot be deleted because there are already borrowed copies"})
+			return
+		}
+
 	}
 
 	json.NewEncoder(w).Encode(map[string]string{"message": "Book Deleted successfully"})

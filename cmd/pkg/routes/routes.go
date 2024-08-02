@@ -33,7 +33,6 @@ func SetupRouter() *mux.Router {
 	authenticatedRouter.HandleFunc("/", redirectToHomeOrLogin).Methods("GET")
 	authenticatedRouter.HandleFunc("/admin/welcome", views.AdminHome).Methods("GET")
 	authenticatedRouter.HandleFunc("/user/welcome", views.UserHome).Methods("GET")
-	authenticatedRouter.HandleFunc("/books", controllers.AddBook).Methods("POST")
 	authenticatedRouter.HandleFunc("/books", controllers.GetBooks).Methods("GET")
 	authenticatedRouter.HandleFunc("/books/{id}", controllers.GetBook).Methods("GET")
 	authenticatedRouter.HandleFunc("/books/{id}", controllers.DeleteBook).Methods("DELETE")

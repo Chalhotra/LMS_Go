@@ -114,6 +114,9 @@
           if (password !== confirmPassword) {
             alert("Passwords do not match");
             return;
+          } else if (password.length < 8) {
+            alert("Password length must be at least 8 characters long");
+            return;
           }
 
           fetch("/register", {

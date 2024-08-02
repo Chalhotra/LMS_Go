@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -15,22 +16,28 @@ func AdminAddBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var book types.Book
 	err := json.NewDecoder(r.Body).Decode(&book)
+
 	if err != nil {
 		// w.WriteHeader(http.StatusSeeOther)
 		w.Header().Set("Location", "/error?type=400 Bad Request&message=Invalid request format")
 		return
 	}
+	var bookQuantity, _ = strconv.Atoi(book.Quantity)
+	if bookQuantity > 0 {
+		err = models.AddBook(book)
+		if err != nil {
 
-	err = models.AddBook(book)
-	if err != nil {
+			w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
+			return
+		}
 
-		w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
+		json.NewEncoder(w).Encode(map[string]string{"message": "Book added successfully"})
+	} else {
+
 		return
+
 	}
 
-	// w.WriteHeader(http.StatusSeeOther)
-	// w.Header().Set("Location", "/login")
-	json.NewEncoder(w).Encode(map[string]string{"message": "Book added successfully"})
 }
 
 func GetAllCheckouts(w http.ResponseWriter, r *http.Request) {

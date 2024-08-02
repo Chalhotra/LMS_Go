@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -77,14 +78,25 @@ func AddBook(book types.Book) error {
 
 	return nil
 }
-
 func DeleteBook(id string) error {
 	db, err := Connection()
 	if err != nil {
 		return err
 	}
 
-	query := `DELETE FROM books WHERE id = ?`
+	// Check if there are any borrowed copies of the book
+	query := `SELECT COUNT(*) FROM checkouts WHERE book_id = ? AND return_date IS NULL`
+	var borrowedCount int
+	err = db.QueryRow(query, id).Scan(&borrowedCount)
+	if err != nil {
+		return err
+	}
+
+	if borrowedCount > 0 {
+		return errors.New("book cannot be deleted because there are borrowed copies")
+	}
+
+	query = `DELETE FROM books WHERE id = ?`
 	_, err = db.Exec(query, id)
 	if err != nil {
 		return err
@@ -99,7 +111,20 @@ func UpdateBook(id string, book types.Book) error {
 		return err
 	}
 
-	query := `
+	// Check the number of borrowed copies of the book
+	query := `SELECT COUNT(*) FROM checkouts WHERE book_id = ? AND return_date IS NULL`
+	var borrowedCount int
+	err = db.QueryRow(query, id).Scan(&borrowedCount)
+	if err != nil {
+		return err
+	}
+	var bookQty, _ = strconv.Atoi(book.Quantity)
+	// Ensure the new quantity is not less than the number of borrowed copies
+	if bookQty < borrowedCount {
+		return errors.New("quantity cannot be less than the number of borrowed copies")
+	}
+
+	query = `
 		UPDATE books
 		SET quantity = ?
 		WHERE id = ?
@@ -164,7 +189,7 @@ func CreateCheckoutRequest(checkout types.CheckoutRequest) error {
 	}
 
 	if checkoutDateStr != "" {
-		checkoutDate, err := time.Parse("2006-01-02", checkoutDateStr)
+		checkoutDate, err := time.Parse("2006-01-02 15:04:05", checkoutDateStr)
 		if err != nil {
 			return err
 		}

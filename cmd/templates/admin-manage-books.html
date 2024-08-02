@@ -119,7 +119,8 @@
             })
             .then((data) => {
               console.log(data);
-              alert("Book deleted successfully!");
+
+              alert(data.message);
               location.reload(); // Refresh the page to update the book list
             })
             .catch((error) => {

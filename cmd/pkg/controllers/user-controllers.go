@@ -97,18 +97,43 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = models.RegisterUser(user)
-	if err != nil {
-		if err.Error() == "username already exists" {
-			w.Header().Set("Location", "/error?type=400 Bad Request&message=Username already exists")
-		} else {
-			w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
+	if len(user.Password) >= 8 {
+		err = models.RegisterUser(user)
+		if err != nil {
+			if err.Error() == "username already exists" {
+				w.Header().Set("Location", "/error?type=400 Bad Request&message=Username already exists")
+
+			} else {
+				w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
+			}
+			return
 		}
-		return
+
+		// w.Header().Set("Location", "/login")
+		// json.NewEncoder(w).Encode(map[string]string{"username": user.Username})
+
+		token, expirationTime, err := generateJWT(user.Username, user.IsAdmin)
+		if err != nil {
+			// w.WriteHeader(http.StatusSeeOther)
+			w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Failed to sign JWT")
+			return
+		}
+
+		http.SetCookie(w, &http.Cookie{
+			Name:    "jwt",
+			Value:   token,
+			Expires: expirationTime,
+		})
+
+		// w.WriteHeader(http.StatusSeeOther)
+
+		w.Header().Set("Location", "/api/user/welcome")
+
+	} else {
+		w.Header().Set("Location", "/error?type=400 Bad Request Error&message=Password must be at least 8 characters")
+
 	}
 
-	w.Header().Set("Location", "/login")
-	json.NewEncoder(w).Encode(map[string]string{"username": user.Username})
 }
 
 func LogoutUser(w http.ResponseWriter, r *http.Request) {
