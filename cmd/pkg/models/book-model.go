@@ -25,7 +25,7 @@ func GetBooks() ([]types.Book, error) {
 	var bookList []types.Book
 	for rows.Next() {
 		var book types.Book
-		err := rows.Scan(&book.ID, &book.ISBN, &book.Title, &book.Author, &book.Quantity, &book.Available)
+		err := rows.Scan(&book.ID, &book.ISBN, &book.Title, &book.Author, &book.Quantity, &book.Available, &book.CurrentBorrowedCount, &book.AvailableQuantity)
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +49,7 @@ func GetBookById(id string) (types.Book, error) {
 	row := db.QueryRow(query, id)
 
 	var book types.Book
-	err = row.Scan(&book.ID, &book.ISBN, &book.Title, &book.Author, &book.Quantity, &book.Available)
+	err = row.Scan(&book.ID, &book.ISBN, &book.Title, &book.Author, &book.Quantity, &book.Available, &book.CurrentBorrowedCount, &book.AvailableQuantity)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return types.Book{}, errors.New("book not found")
@@ -156,7 +156,7 @@ func SearchBooks(query string) ([]types.Book, error) {
 	var books []types.Book
 	for rows.Next() {
 		var book types.Book
-		err := rows.Scan(&book.ID, &book.ISBN, &book.Title, &book.Author, &book.Quantity, &book.Available)
+		err := rows.Scan(&book.ID, &book.ISBN, &book.Title, &book.Author, &book.Quantity, &book.Available, &book.CurrentBorrowedCount, &book.AvailableQuantity)
 		if err != nil {
 			return nil, err
 		}
@@ -175,8 +175,6 @@ func CreateCheckoutRequest(checkout types.CheckoutRequest) error {
 		return err
 	}
 	defer db.Close()
-
-	// Check if the user has already borrowed the book and hasn't returned it
 	var checkoutDateStr string
 	query := `
 		SELECT checkout_date
@@ -305,7 +303,7 @@ func CheckinBook(checkoutID int) error {
 	}
 
 	// Increment the quantity in the books table
-	query = `UPDATE books SET quantity = quantity + 1 WHERE id = ?`
+	query = `UPDATE books SET available_quantity = available_quantity + 1 WHERE id = ?`
 	_, err = tx.Exec(query, bookID)
 	if err != nil {
 		tx.Rollback()
@@ -321,14 +319,13 @@ func CheckinBook(checkoutID int) error {
 	return nil
 }
 func GetAllCheckouts() ([]types.CheckoutRequestPageElement, error) {
-	// SQL query to fetch all checkouts with joined tables
+
 	db, err := Connection()
 	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	// Construct the SQL query with joins
 	query := `
 		SELECT c.id, u.username, b.title AS book_title, c.checkout_status 
 		FROM checkouts c 
@@ -362,7 +359,6 @@ func GetAllCheckouts() ([]types.CheckoutRequestPageElement, error) {
 
 	return checkouts, nil
 }
-
 func ApproveCheckout(checkoutID string) error {
 	// Start a transaction
 	db, err := Connection()
@@ -370,11 +366,27 @@ func ApproveCheckout(checkoutID string) error {
 		return err
 	}
 	defer db.Close()
+
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
+
+	// Check if the available_quantity is greater than 0
+	var availableQuantity int
+	err = tx.QueryRow(`
+		SELECT b.available_quantity
+		FROM books b
+		JOIN checkouts c ON b.id = c.book_id
+		WHERE c.id = ?`, checkoutID).Scan(&availableQuantity)
+	if err != nil {
+		return err
+	}
+
+	if availableQuantity <= 0 {
+		return errors.New("cannot approve checkout: no available copies")
+	}
 
 	// Update the checkout status to 'approved'
 	_, err = tx.Exec("UPDATE checkouts SET checkout_status = 'approved' WHERE id = ?", checkoutID)
@@ -382,8 +394,8 @@ func ApproveCheckout(checkoutID string) error {
 		return err
 	}
 
-	// Decrement the quantity of the book in the books table
-	_, err = tx.Exec("UPDATE books SET quantity = quantity - 1 WHERE id = (SELECT book_id FROM checkouts WHERE id = ?)", checkoutID)
+	// Decrement the available_quantity of the book in the books table
+	_, err = tx.Exec("UPDATE books SET available_quantity = available_quantity - 1 WHERE id = (SELECT book_id FROM checkouts WHERE id = ?)", checkoutID)
 	if err != nil {
 		return err
 	}
@@ -396,8 +408,6 @@ func ApproveCheckout(checkoutID string) error {
 
 	return nil
 }
-
-// DenyCheckout denies a checkout request
 func DenyCheckout(checkoutID string) error {
 	// Update the checkout status to 'denied'
 	db, err := Connection()

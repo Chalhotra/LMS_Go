@@ -37,6 +37,7 @@
                   <th>Title</th>
                   <th>Author</th>
                   <th>Quantity</th>
+                  <th>Available Quantity</th>
                   <th>Availability Status</th>
                   <th>Actions</th>
                 </tr>
@@ -72,6 +73,7 @@
                 <td>${book.title}</td>
                 <td>${book.author}</td>
                 <td>${book.quantity}</td>
+                <td>${book.available_quantity}</td>
                 <td>${book.available == "1" ? "Available" : "Checked Out"}</td>
                 <td>
                   <button class="btn btn-primary" onclick="location.href='/api/admin/books/update/${

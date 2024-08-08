@@ -7,12 +7,14 @@ import (
 )
 
 type Book struct {
-	ID        int    `json:"id"`
-	ISBN      string `json:"isbn"`
-	Title     string `json:"title"`
-	Author    string `json:"author"`
-	Quantity  string `json:"quantity"`
-	Available string `json:"available"`
+	ID                   int    `json:"id"`
+	ISBN                 string `json:"isbn"`
+	Title                string `json:"title"`
+	Author               string `json:"author"`
+	Quantity             string `json:"quantity"`
+	Available            string `json:"available"`
+	CurrentBorrowedCount string `json:"current_borrowed_count"`
+	AvailableQuantity    string `json:"available_quantity"`
 }
 
 type JsonResponse struct {
