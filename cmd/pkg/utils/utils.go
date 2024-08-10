@@ -5,9 +5,31 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 )
+
+func GenerateJWT(username string, isAdmin string) (string, time.Time, error) {
+	var jwtKey = []byte("soumil05")
+	expirationTime := time.Now().Add(time.Minute * 5)
+	claims := &types.Claims{
+		Username: username,
+		IsAdmin:  isAdmin,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		return "", time.Now(), err
+	}
+
+	return tokenString, expirationTime, nil
+}
 
 func GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) types.User {
 	user := context.Get(r, "user")
