@@ -29,7 +29,7 @@ mysql -u "$username" -p"$password" -e "CREATE DATABASE IF NOT EXISTS $dbName;"
 
 echo "Created database 'mvc' successfully!"
 
-migrate -path ./database/migration/ -database "mysql://$username:$password@tcp(localhost:3306)/$dbName" -verbose up
+migrate -path ./cmd/database/migration/ -database "mysql://$username:$password@tcp(localhost:3306)/$dbName" -verbose up
 
 echo "Database migrated successfully!"
 
@@ -38,4 +38,4 @@ echo "Database configuration file created successfully!"
 go mod vendor
 go mod tidy
 
-echo "Kindly run the following command to start the server: go run main.go"
+echo "Kindly run the following command to start the server: make run"

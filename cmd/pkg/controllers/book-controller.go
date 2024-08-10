@@ -60,13 +60,20 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 
 	err = models.UpdateBook(params["id"], book)
 	if err != nil {
-		w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
-		w.WriteHeader(http.StatusSeeOther)
-		return
+		if err.Error() == "quantity cannot be less than the number of borrowed copies" {
+
+			json.NewEncoder(w).Encode(map[string]string{"isbn": book.ISBN, "title": book.Title, "author": book.Author, "quantity": book.Quantity, "message": err.Error(), "success": "false"})
+			return
+		} else {
+			w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
+			w.WriteHeader(http.StatusSeeOther)
+			return
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(book)
+	// json.NewEncoder(w).Encode(book)
+	json.NewEncoder(w).Encode(map[string]string{"isbn": book.ISBN, "title": book.Title, "author": book.Author, "quantity": book.Quantity, "message": "Book updated successfully", "success": "true"})
 }
 
 func GetBook(w http.ResponseWriter, r *http.Request) {
@@ -82,6 +89,7 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetBooks(w http.ResponseWriter, r *http.Request) {
+
 	w.Header().Set("Content-Type", "application/json")
 	bookList, err := models.GetBooks()
 	if err != nil {

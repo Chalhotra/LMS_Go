@@ -31,9 +31,9 @@ func AdminAddBook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(map[string]string{"message": "Book added successfully"})
+		json.NewEncoder(w).Encode(map[string]string{"message": "Book added successfully", "success": "true"})
 	} else {
-
+		json.NewEncoder(w).Encode(map[string]string{"message": "A negative or zero book quantity is not allowed", "success": "false"})
 		return
 
 	}
@@ -73,6 +73,7 @@ func ApproveCheckout(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
+		fmt.Print(err.Error())
 		return
 	}
 	json.NewEncoder(w).Encode(map[string]string{"message": "Approved Checkout Request!"})

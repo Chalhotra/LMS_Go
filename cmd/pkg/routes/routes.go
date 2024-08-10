@@ -19,7 +19,14 @@ func SetupRouter() *mux.Router {
 
 	// Routes for rendering HTML templates
 	router.HandleFunc("/register", views.RegisterPage).Methods("GET")
-	router.HandleFunc("/login", views.LoginPage).Methods("GET")
+	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		cookie := middleware.ExtractTokenFromCookie(r)
+		if cookie != "" {
+			http.Redirect(w, r, "/api/", http.StatusSeeOther)
+		} else {
+			views.LoginPage(w, r)
+		}
+	}).Methods("GET")
 
 	// Routes for handling API requests
 	router.HandleFunc("/login", controllers.LoginUser).Methods("POST")

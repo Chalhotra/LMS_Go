@@ -85,7 +85,7 @@ func DeleteBook(id string) error {
 	}
 
 	// Check if there are any borrowed copies of the book
-	query := `SELECT COUNT(*) FROM checkouts WHERE book_id = ? AND return_date IS NULL`
+	query := `SELECT COUNT(*) FROM checkouts WHERE book_id = ? AND return_date IS NULL AND checkout_status = 'approved'`
 	var borrowedCount int
 	err = db.QueryRow(query, id).Scan(&borrowedCount)
 	if err != nil {
@@ -112,7 +112,7 @@ func UpdateBook(id string, book types.Book) error {
 	}
 
 	// Check the number of borrowed copies of the book
-	query := `SELECT COUNT(*) FROM checkouts WHERE book_id = ? AND return_date IS NULL`
+	query := `SELECT current_borrowed_count FROM books WHERE id = ?`
 	var borrowedCount int
 	err = db.QueryRow(query, id).Scan(&borrowedCount)
 	if err != nil {
@@ -303,7 +303,7 @@ func CheckinBook(checkoutID int) error {
 	}
 
 	// Increment the quantity in the books table
-	query = `UPDATE books SET available_quantity = available_quantity + 1 WHERE id = ?`
+	query = `UPDATE books SET current_borrowed_count  = current_borrowed_count  + 1 WHERE id = ?`
 	_, err = tx.Exec(query, bookID)
 	if err != nil {
 		tx.Rollback()
@@ -395,7 +395,7 @@ func ApproveCheckout(checkoutID string) error {
 	}
 
 	// Decrement the available_quantity of the book in the books table
-	_, err = tx.Exec("UPDATE books SET available_quantity = available_quantity - 1 WHERE id = (SELECT book_id FROM checkouts WHERE id = ?)", checkoutID)
+	_, err = tx.Exec("UPDATE books SET current_borrowed_count  = current_borrowed_count + 1 WHERE id = (SELECT book_id FROM checkouts WHERE id = ?)", checkoutID)
 	if err != nil {
 		return err
 	}
@@ -413,11 +413,13 @@ func DenyCheckout(checkoutID string) error {
 	db, err := Connection()
 	if err != nil {
 		return err
+		// fmt.Print(err.Error())
 	}
 	defer db.Close()
 	_, err = db.Exec("UPDATE checkouts SET checkout_status = 'denied' WHERE id = ?", checkoutID)
 	if err != nil {
 		return err
+		// fmt.Print(err.Error())
 	}
 
 	return nil

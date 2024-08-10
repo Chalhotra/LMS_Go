@@ -16,7 +16,7 @@ var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 // Middleware function to authenticate JWT tokens from cookie
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenString := extractTokenFromCookie(r)
+		tokenString := ExtractTokenFromCookie(r)
 		if tokenString == "" {
 			// Redirect to login if token is missing
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -56,7 +56,7 @@ func Authenticate(next http.Handler) http.Handler {
 }
 
 // Extract JWT token from cookie
-func extractTokenFromCookie(r *http.Request) string {
+func ExtractTokenFromCookie(r *http.Request) string {
 	cookie, err := r.Cookie("jwt")
 	if err != nil {
 		return ""
