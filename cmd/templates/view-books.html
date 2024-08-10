@@ -58,16 +58,20 @@
               data.forEach((book) => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                <td>${book.isbn}</td>
-                <td>${book.title}</td>
-                <td>${book.author}</td>
-                <td>${book.available == "1" ? "Available" : "Checked Out"}</td>
+                <td>${book.book.isbn}</td>
+                <td>${book.book.title}</td>
+                <td>${book.book.author}</td>
+                <td>${
+                  book.book.available == "1" ? "Available" : "Checked Out"
+                }</td>
                 <td>
                   <button class="btn btn-primary" ${
-                    book.available == "0" ? "disabled" : ""
+                    book.book.available == "0" || book.status > 0
+                      ? "disabled"
+                      : ""
                   }
-                    onclick="checkoutBook('${book.id}')">
-                    ${book.available == "1" ? "Checkout" : "Unavailable"}
+                    onclick="checkoutBook('${book.book.id}')">
+                    ${book.book.available == "1" ? "Checkout" : "Unavailable"}
                   </button>
                 </td>
               `;

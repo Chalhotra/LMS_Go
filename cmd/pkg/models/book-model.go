@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func GetBooks() ([]types.Book, error) {
+func GetBooks(UserID int) ([]types.BookPageElement, error) {
 	db, err := Connection()
 	if err != nil {
 		return nil, err
@@ -22,13 +22,16 @@ func GetBooks() ([]types.Book, error) {
 	}
 	defer rows.Close()
 
-	var bookList []types.Book
+	var bookList []types.BookPageElement
 	for rows.Next() {
-		var book types.Book
-		err := rows.Scan(&book.ID, &book.ISBN, &book.Title, &book.Author, &book.Quantity, &book.Available, &book.CurrentBorrowedCount, &book.AvailableQuantity)
+
+		var book types.BookPageElement
+		err := rows.Scan(&book.Book.ID, &book.Book.ISBN, &book.Book.Title, &book.Book.Author, &book.Book.Quantity, &book.Book.Available, &book.Book.CurrentBorrowedCount, &book.Book.AvailableQuantity)
 		if err != nil {
 			return nil, err
 		}
+		var borrowedQuery = `SELECT COUNT(*) FROM checkouts WHERE book_id = ? AND return_date IS NULL AND user_id = ?`
+		err = db.QueryRow(borrowedQuery, book.Book.ID, UserID).Scan(&book.Status)
 		bookList = append(bookList, book)
 	}
 

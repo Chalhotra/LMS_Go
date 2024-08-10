@@ -68,3 +68,8 @@ type CheckoutRequestPageElement struct {
 	CheckoutStatus string  `json:"checkout_status"`
 	Fine           float64 `json:"fine"`
 }
+
+type BookPageElement struct {
+	Book   Book `json:"book"`
+	Status int  `json:"status"`
+}

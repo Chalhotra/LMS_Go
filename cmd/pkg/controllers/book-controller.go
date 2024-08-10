@@ -91,7 +91,12 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 func GetBooks(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
-	bookList, err := models.GetBooks()
+	user, ok := getUserFromContext(r)
+	if !ok {
+		w.Header().Set("Location", "/error?type=401 Unauthorized&message=Unauthorized")
+		return
+	}
+	bookList, err := models.GetBooks(user.ID)
 	if err != nil {
 		w.Header().Set("Location", "/error?type=500 Internal Server Error&message=Internal server error")
 		w.WriteHeader(http.StatusSeeOther)
