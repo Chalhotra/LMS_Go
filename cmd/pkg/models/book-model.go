@@ -32,6 +32,9 @@ func GetBooks(UserID int) ([]types.BookPageElement, error) {
 		}
 		var borrowedQuery = `SELECT COUNT(*) FROM checkouts WHERE book_id = ? AND return_date IS NULL AND user_id = ?`
 		err = db.QueryRow(borrowedQuery, book.Book.ID, UserID).Scan(&book.Status)
+		if err != nil {
+			return nil, err
+		}
 		bookList = append(bookList, book)
 	}
 
