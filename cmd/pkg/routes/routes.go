@@ -19,6 +19,9 @@ func SetupRouter() *mux.Router {
 
 	// Routes for rendering HTML templates
 	router.HandleFunc("/register", views.RegisterPage).Methods("GET")
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	})
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		cookie := middleware.ExtractTokenFromCookie(r)
 		if cookie != "" {
