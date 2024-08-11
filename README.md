@@ -34,18 +34,67 @@ This project is a Library Management System built using the MVC architecture and
 
 ### Installation
 
-1. Clone the Repository:
+#### On macOS
+
+1. **Install Nginx**:
+    ```bash
+    brew install nginx
+    ```
+
+2. **Install Dependencies**:
+    ```bash
+    go get -u github.com/golang-migrate/migrate/v4
+    ```
+
+3. **Clone the Repository**:
     ```bash
     git clone https://github.com/Chalhotra/LMS_Go.git
     cd LMS_Go
     ```
 
-2. Build and Run the Application:
+4. **Run Virtual Hosting Setup**:
+    ```bash
+    chmod +x host.sh
+    ./host.sh
+    ```
+
+5. **Build and Run the Application**:
+    ```bash
+    make run
+    ```
+
+#### On Linux
+
+1. **Install Nginx**:
+    ```bash
+    sudo apt update
+    sudo apt install nginx
+    ```
+
+2. **Install Dependencies**:
+    ```bash
+    go get -u github.com/golang-migrate/migrate/v4
+    ```
+
+3. **Clone the Repository**:
+    ```bash
+    git clone https://github.com/Chalhotra/LMS_Go.git
+    cd LMS_Go
+    ```
+
+4. **Run Virtual Hosting Setup**:
+    ```bash
+    chmod +x host.sh
+    ./host.sh
+    ```
+
+5. **Build and Run the Application**:
     ```bash
     make run
     ```
 
 ### Makefile Commands
+
 - **build**: Clean and build the application.
     ```bash
     make build
@@ -102,9 +151,11 @@ This project is a Library Management System built using the MVC architecture and
     ```
 
 ## Usage
+
 ### Login and Register Portals:
 - Access via `/login` and `/register`
-- Initially when you run ``` make migrate-up```, a super admin user is created by default with credentials, username: admin, password: admin
+- Initially when you run `make migrate-up`, a super admin user is created by default with credentials: `username: admin`, `password: admin`
+
 ### Admin Portal:
 - Access via `/api/admin/`.
 - Manage books and user requests.
@@ -112,3 +163,10 @@ This project is a Library Management System built using the MVC architecture and
 ### Client Portal:
 - Access via `/api/client/`.
 - View available books, request checkouts/check-ins, and view borrowing history.
+
+## Troubleshooting
+
+- If you encounter issues with Nginx, check the PID file location and permissions.
+- Ensure Nginx configuration is valid by running `nginx -t` before restarting.
+- For detailed errors, check Nginx logs located in `/var/log/nginx/`.
+
